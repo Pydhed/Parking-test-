@@ -20,13 +20,13 @@
             user-select: none;
         }
         
-        /* Анимация выезда машинки целиком снизу */
-        @keyframes driveInFull {
+        /* Анимация выезда машинки */
+        @keyframes driveIn {
             0% { 
-                transform: translateY(250px); 
+                transform: translateY(100px); 
                 opacity: 0; 
             }
-            30% {
+            20% {
                 opacity: 1;
             }
             100% { 
@@ -35,33 +35,27 @@
             }
         }
         .car-animate {
-            animation: driveInFull 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation: driveIn 1s ease-out forwards;
         }
         
-        /* Анимация появления текста над машинкой */
-        @keyframes fadeInUp {
-            0% { 
-                transform: translateY(20px); 
-                opacity: 0; 
-            }
-            100% { 
-                transform: translateY(0); 
-                opacity: 1; 
-            }
+        /* Анимация появления текста */
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
         .text-pop {
-            animation: fadeInUp 0.5s ease-out 0.8s forwards;
+            animation: fadeIn 0.5s ease-out 0.7s forwards;
             opacity: 0;
         }
         
-        /* Анимация появления иконок */
+        /* Анимация иконок */
         @keyframes popIn {
             0% { transform: scale(0); opacity: 0; }
-            60% { transform: scale(1.2); opacity: 1; }
+            70% { transform: scale(1.2); opacity: 1; }
             100% { transform: scale(1); opacity: 1; }
         }
         .icon-pop {
-            animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.6s forwards;
+            animation: popIn 0.4s ease-out 0.5s forwards;
             opacity: 0;
         }
     </style>
@@ -90,19 +84,19 @@
             <div id="timer-value" class="text-2xl font-mono font-bold text-amber-400 drop-shadow-sm">--:--:--</div>
         </div>
 
-        <!-- Схема дороги (увеличена до h-96 для полной анимации) -->
-        <div class="w-full h-96 bg-slate-600 rounded-3xl border-4 border-slate-500 flex relative shadow-2xl mb-3 overflow-visible">
+        <!-- Схема дороги -->
+        <div class="w-full h-96 bg-slate-600 rounded-3xl border-4 border-slate-500 flex relative shadow-2xl mb-3">
             <!-- Разделительная полоса -->
             <div class="absolute top-0 bottom-0 left-1/2 w-2 -ml-[4px] border-l-[8px] border-dashed border-slate-300 opacity-60 z-10 rounded-full"></div>
             
-            <!-- Левая сторона -->
-            <div id="left-lane" class="flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-4 transition-all duration-500 border-t-4 border-transparent rounded-tl-2xl overflow-hidden">
+            <!-- Левая сторона (БЕЗ overflow-hidden) -->
+            <div id="left-lane" class="flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-4 transition-all duration-500 border-t-4 border-transparent rounded-tl-2xl">
                 <div class="absolute top-2 text-slate-300 text-[10px] uppercase font-bold tracking-widest text-center z-20">Слева<br><span class="text-[9px] text-slate-400">(I)</span></div>
                 <div id="left-road-content" class="w-full h-full flex flex-col items-center justify-end relative pb-2"></div>
             </div>
 
-            <!-- Правая сторона -->
-            <div id="right-lane" class="flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-4 transition-all duration-500 border-t-4 border-transparent rounded-tr-2xl overflow-hidden">
+            <!-- Правая сторона (БЕЗ overflow-hidden) -->
+            <div id="right-lane" class="flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-4 transition-all duration-500 border-t-4 border-transparent rounded-tr-2xl">
                 <div class="absolute top-2 text-slate-300 text-[10px] uppercase font-bold tracking-widest text-center z-20">Справа<br><span class="text-[9px] text-slate-400">(II)</span></div>
                 <div id="right-road-content" class="w-full h-full flex flex-col items-center justify-end relative pb-2"></div>
             </div>
@@ -204,8 +198,8 @@
             
             leftContainer.innerHTML = '';
             rightContainer.innerHTML = '';
-            leftLane.className = "flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-4 transition-all duration-500 border-t-4 border-transparent rounded-tl-2xl overflow-hidden";
-            rightLane.className = "flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-4 transition-all duration-500 border-t-4 border-transparent rounded-tr-2xl overflow-hidden";
+            leftLane.className = "flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-4 transition-all duration-500 border-t-4 border-transparent rounded-tl-2xl";
+            rightLane.className = "flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-4 transition-all duration-500 border-t-4 border-transparent rounded-tr-2xl";
 
             if (mode === 'strict') {
                 if (midnightParkLeft) {
@@ -242,7 +236,6 @@
                     leftLane.classList.add('opacity-50');
                 }
             } else {
-                // Мягкий режим: машинки выезжают с обеих сторон
                 if (midnightParkLeft) {
                     leftContainer.innerHTML = `
                         <div class="text-pop text-xs text-green-400 font-bold text-center mb-1 absolute top-8 z-30 bg-slate-900/80 px-2 py-1 rounded">
@@ -344,7 +337,7 @@
         document.head.appendChild(manifestLink);
 
         const swCode = `
-            const CACHE_NAME = 'parking-v5';
+            const CACHE_NAME = 'parking-v6';
             self.addEventListener('install', e => { self.skipWaiting(); });
             self.addEventListener('activate', e => { self.clients.claim(); });
             self.addEventListener('fetch', e => {
