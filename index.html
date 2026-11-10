@@ -1,14 +1,3 @@
-Я полностью переработал код под ваши требования. 
-
-**Что изменилось:**
-1. **Главный экран теперь информативен сразу**: Убрана всплывающая панель и кнопка «ПАРКОВАТЬСЯ». Вердикт, таймер и схема дороги теперь видны сразу при открытии приложения.
-2. **Анимация с обеих сторон**: В период до 21:00 (когда парковка условно допустима с обеих сторон, но готовится смена) на схеме выезжают **две машинки**. 
-3. **Визуальный акцент на полночь**: Та сторона, где можно будет парковаться после полуночи, подсвечивается **зеленой рамкой и галочкой** («Останется после 00:00»). Вторая сторона получает **желтый значок предупреждения** («Убрать до 21:00»), чтобы водитель сразу понимал, что ночью там парковаться будет нельзя.
-4. **Кнопка «Обновить»**: Внизу добавлена большая удобная кнопка с иконкой, которая перезагружает страницу (`window.location.reload()`), сбрасывая анимации и обновляя данные.
-
-Вот готовый код. Просто сохраните его как `.html` файл:
-
-```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -20,31 +9,22 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Парковка">
 
-    <!-- Иконки для рабочего стола (Android, iOS, PC) -->
     <link rel="icon" type="image/png" href="logo-gradient.png">
     <link rel="apple-touch-icon" href="logo-gradient.png">
-
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <style>
         body {
             -webkit-tap-highlight-color: transparent;
             -webkit-touch-callout: none;
             user-select: none;
         }
-        @keyframes subtlePulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-        }
-        .sign-pulse {
-            animation: subtlePulse 2s infinite ease-in-out;
-        }
         @keyframes driveIn {
-            0% { transform: translateY(150px); opacity: 0; }
+            0% { transform: translateY(120px); opacity: 0; }
             100% { transform: translateY(0); opacity: 1; }
         }
         .car-animate {
             animation: driveIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-            opacity: 0; /* Начальное состояние до анимации */
         }
         @keyframes popIn {
             0% { transform: scale(0); opacity: 0; }
@@ -52,42 +32,37 @@
             100% { transform: scale(1); opacity: 1; }
         }
         .icon-pop {
-            animation: popIn 0.4s ease-out 0.6s forwards;
+            animation: popIn 0.4s ease-out 0.5s forwards;
             opacity: 0;
-            transform: scale(0);
         }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-200 h-screen w-full flex flex-col font-sans overflow-hidden relative">
 
-    <!-- Основной экран (всегда виден) -->
-    <main class="flex-1 flex flex-col items-center pt-6 px-4 w-full max-w-md mx-auto relative z-10">
+    <main class="flex-1 flex flex-col items-center pt-8 px-4 w-full max-w-md mx-auto relative z-10">
         
         <!-- Время -->
-        <div id="current-datetime" class="text-center text-slate-300 font-medium text-base mb-4 bg-slate-800/50 py-2 px-5 rounded-full border border-slate-700 shadow-md">
+        <div id="current-datetime" class="text-center text-slate-300 font-medium text-base mb-6 bg-slate-800/50 py-2 px-5 rounded-full border border-slate-700 shadow-md">
             Загрузка...
         </div>
 
-        <h1 class="text-3xl font-extrabold text-white tracking-tight text-center mb-5 drop-shadow-md">
+        <h1 class="text-3xl font-extrabold text-white tracking-tight text-center mb-6 drop-shadow-md">
             Нагорное шоссе
         </h1>
 
         <!-- Вердикт -->
         <div class="w-full bg-slate-800/60 p-4 rounded-2xl border border-slate-700 mb-4 text-center shadow-lg">
-            <p id="verdict-text" class="text-lg text-white font-medium leading-relaxed">
-                <!-- Текст генерируется JS -->
-            </p>
+            <p id="verdict-text" class="text-lg text-white font-medium leading-relaxed"></p>
         </div>
 
         <!-- Таймер -->
         <div id="timer-container" class="w-full bg-slate-800/60 p-3 rounded-2xl border border-slate-700 mb-6 text-center">
             <div id="timer-title" class="text-xs text-slate-400 uppercase tracking-widest font-bold mb-1">...</div>
-            <div id="timer-value" class="text-2xl font-mono font-bold text-amber-400 drop-shadow-sm">--:--:--</div>
+            <div id="timer-value" class="text-3xl font-mono font-bold text-amber-400 drop-shadow-sm">--:--:--</div>
         </div>
 
         <!-- Схема дороги -->
         <div class="w-full h-72 bg-slate-600 rounded-3xl border-4 border-slate-500 flex relative overflow-hidden shadow-2xl mb-4">
-            <!-- Разделительная полоса -->
             <div class="absolute top-0 bottom-0 left-1/2 w-2 -ml-[4px] border-l-[8px] border-dashed border-slate-300 opacity-60 z-10"></div>
             
             <!-- Левая сторона -->
@@ -102,12 +77,9 @@
                 <div id="right-road-content" class="w-full h-full flex flex-col items-center justify-center relative"></div>
             </div>
         </div>
-        
-        <!-- Подсказка -->
-        <p class="text-xs text-slate-500 text-center mt-2">Данные обновляются автоматически каждую секунду</p>
     </main>
 
-    <!-- Нижняя кнопка Обновить -->
+    <!-- Кнопка Обновить -->
     <div class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md pb-6 pt-3 px-4 border-t border-slate-800 z-20 flex justify-center">
         <button onclick="window.location.reload()" class="w-full max-w-md bg-slate-700 hover:bg-slate-600 active:bg-slate-800 text-white text-xl font-bold py-4 rounded-2xl shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-3">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -118,9 +90,21 @@
     </div>
 
     <script>
-        // SVG машинки (чуть компактнее для схемы)
+        // SVG машинки (две версии: мгновенная и с задержкой для эффекта поочередного выезда)
         const carSVG = `
             <svg viewBox="0 0 100 200" class="w-12 h-24 car-animate drop-shadow-xl absolute bottom-2 z-10">
+                <rect x="15" y="10" width="70" height="180" rx="25" fill="#f8fafc"/>
+                <rect x="20" y="40" width="60" height="35" fill="#0f172a" rx="5"/>
+                <rect x="20" y="130" width="60" height="40" fill="#0f172a" rx="5"/>
+                <circle cx="25" cy="20" r="5" fill="#fef08a"/>
+                <circle cx="75" cy="20" r="5" fill="#fef08a"/>
+                <rect x="20" y="180" width="15" height="5" fill="#ef4444" rx="2"/>
+                <rect x="65" y="180" width="15" height="5" fill="#ef4444" rx="2"/>
+            </svg>
+        `;
+
+        const carSVGDelayed = `
+            <svg viewBox="0 0 100 200" class="w-12 h-24 car-animate drop-shadow-xl absolute bottom-2 z-10" style="animation-delay: 0.25s;">
                 <rect x="15" y="10" width="70" height="180" rx="25" fill="#f8fafc"/>
                 <rect x="20" y="40" width="60" height="35" fill="#0f172a" rx="5"/>
                 <rect x="20" y="130" width="60" height="40" fill="#0f172a" rx="5"/>
@@ -157,8 +141,6 @@
 
         function calculateLogic() {
             const now = new Date();
-            
-            // Обновление даты на главном экране
             const dateStr = now.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
             const timeStr = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
             document.getElementById('current-datetime').textContent = `${dateStr.charAt(0).toUpperCase() + dateStr.slice(1)} • ${timeStr}`;
@@ -170,27 +152,22 @@
             tomorrow.setDate(tomorrow.getDate() + 1);
             let tomorrowOdd = (tomorrow.getDate() % 2 !== 0);
             
-            // Определяем, где нужно парковаться после полуночи (завтра)
-            // Если завтра нечетное -> паркуемся справа (parkLeft = false)
-            // Если завтра четное -> паркуемся слева (parkLeft = true)
+            // Если завтра четное, паркуемся слева (true). Если нечетное, то справа (false).
             const midnightParkLeft = !tomorrowOdd;
+            const mode = isChangeover ? 'strict' : 'relaxed';
 
             let verdict = "";
-            let mode = ""; // 'strict' (>=21:00) или 'relaxed' (<21:00)
-
-            if (isChangeover) {
-                mode = 'strict';
+            if (mode === 'strict') {
                 if (midnightParkLeft) {
-                    verdict = 'Завтра четное число. Паркуемся только <span class="text-green-400 font-bold">слева</span>. Переставьте автомобиль до полуночи!';
+                    verdict = 'Завтра четное число. Паркуемся только <span class="text-green-400 font-bold">слева</span>. Переставьте авто до 00:00!';
                 } else {
-                    verdict = 'Завтра нечетное число. Паркуемся только <span class="text-green-400 font-bold">справа</span>. Переставьте автомобиль до полуночи!';
+                    verdict = 'Завтра нечетное число. Паркуемся только <span class="text-green-400 font-bold">справа</span>. Переставьте авто до 00:00!';
                 }
             } else {
-                mode = 'relaxed';
                 if (midnightParkLeft) {
-                    verdict = 'До 21:00 можно парковаться с <span class="text-yellow-400 font-bold">обеих сторон</span>. Но учтите: завтра четное число, поэтому после полуночи парковка будет разрешена только <span class="text-green-400 font-bold">слева</span>.';
+                    verdict = 'До 21:00 можно стоять с обеих сторон.<br>Но после полуночи парковка будет разрешена только <span class="text-green-400 font-bold">слева</span> (завтра четное).';
                 } else {
-                    verdict = 'До 21:00 можно парковаться с <span class="text-yellow-400 font-bold">обеих сторон</span>. Но учтите: завтра нечетное число, поэтому после полуночи парковка будет разрешена только <span class="text-green-400 font-bold">справа</span>.';
+                    verdict = 'До 21:00 можно стоять с обеих сторон.<br>Но после полуночи парковка будет разрешена только <span class="text-green-400 font-bold">справа</span> (завтра нечетное).';
                 }
             }
 
@@ -204,40 +181,33 @@
             const leftLane = document.getElementById('left-lane');
             const rightLane = document.getElementById('right-lane');
             
-            // Сброс стилей
             leftContainer.innerHTML = '';
             rightContainer.innerHTML = '';
             leftLane.className = "flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-4 transition-all duration-500 border-t-4 border-transparent";
             rightLane.className = "flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-4 transition-all duration-500 border-t-4 border-transparent";
 
             if (mode === 'strict') {
-                // Строгий режим (после 21:00): одна сторона разрешена, другая запрещена
                 if (midnightParkLeft) {
-                    leftContainer.innerHTML = carSVG + iconOk + `<span class="text-xs text-green-400 font-bold mt-1">Паркуйся здесь</span>`;
-                    rightContainer.innerHTML = iconCross + `<span class="text-xs text-red-400 font-bold mt-1">Не парковаться</span>`;
+                    leftContainer.innerHTML = carSVG + iconOk + `<span class="text-xs text-green-400 font-bold mt-2">Паркуйся здесь</span>`;
+                    rightContainer.innerHTML = iconCross + `<span class="text-xs text-red-400 font-bold mt-2">Не парковаться</span>`;
                     leftLane.classList.add('border-green-500/60', 'bg-slate-800');
                     rightLane.classList.add('opacity-50');
                 } else {
-                    leftContainer.innerHTML = iconCross + `<span class="text-xs text-red-400 font-bold mt-1">Не парковаться</span>`;
-                    rightContainer.innerHTML = carSVG + iconOk + `<span class="text-xs text-green-400 font-bold mt-1">Паркуйся здесь</span>`;
+                    leftContainer.innerHTML = iconCross + `<span class="text-xs text-red-400 font-bold mt-2">Не парковаться</span>`;
+                    rightContainer.innerHTML = carSVG + iconOk + `<span class="text-xs text-green-400 font-bold mt-2">Паркуйся здесь</span>`;
                     rightLane.classList.add('border-green-500/60', 'bg-slate-800');
                     leftLane.classList.add('opacity-50');
                 }
             } else {
-                // Мягкий режим (до 21:00): машинки с обеих сторон, но с предупреждением
+                // Мягкий режим: машинки выезжают с обеих сторон
                 if (midnightParkLeft) {
-                    leftContainer.innerHTML = carSVG + iconOk + `<span class="text-xs text-green-400 font-bold mt-1">Останется после 00:00</span>`;
-                    // Задержка анимации для второй машинки для красоты
-                    const carSVGDelayed = carSVG.replace('class="w-12 h-24 car-animate', 'class="w-12 h-24 car-animate" style="animation-delay: 0.2s; opacity:0"');
-                    rightContainer.innerHTML = carSVGDelayed + iconWarning + `<span class="text-xs text-yellow-400 font-bold mt-1">Убрать до 21:00</span>`;
-                    
+                    leftContainer.innerHTML = carSVG + iconOk + `<span class="text-xs text-green-400 font-bold mt-2">Останется после 00:00</span>`;
+                    rightContainer.innerHTML = carSVGDelayed + iconWarning + `<span class="text-xs text-yellow-400 font-bold mt-2">Убрать до 21:00</span>`;
                     leftLane.classList.add('border-green-500/60');
                     rightLane.classList.add('border-yellow-500/40');
                 } else {
-                    const carSVGDelayed = carSVG.replace('class="w-12 h-24 car-animate', 'class="w-12 h-24 car-animate" style="animation-delay: 0.2s; opacity:0"');
-                    leftContainer.innerHTML = carSVGDelayed + iconWarning + `<span class="text-xs text-yellow-400 font-bold mt-1">Убрать до 21:00</span>`;
-                    rightContainer.innerHTML = carSVG + iconOk + `<span class="text-xs text-green-400 font-bold mt-1">Останется после 00:00</span>`;
-                    
+                    leftContainer.innerHTML = carSVGDelayed + iconWarning + `<span class="text-xs text-yellow-400 font-bold mt-2">Убрать до 21:00</span>`;
+                    rightContainer.innerHTML = carSVG + iconOk + `<span class="text-xs text-green-400 font-bold mt-2">Останется после 00:00</span>`;
                     rightLane.classList.add('border-green-500/60');
                     leftLane.classList.add('border-yellow-500/40');
                 }
@@ -252,12 +222,12 @@
             if (isChangeover) {
                 target.setDate(target.getDate() + 1);
                 target.setHours(0, 0, 0, 0);
-                document.getElementById('timer-title').textContent = "До смены суток и ужесточения правил осталось:";
-                document.getElementById('timer-value').className = "text-2xl font-mono font-bold text-red-400 drop-shadow-sm";
+                document.getElementById('timer-title').textContent = "До смены правил (00:00) осталось:";
+                document.getElementById('timer-value').className = "text-3xl font-mono font-bold text-red-400 drop-shadow-sm";
             } else {
                 target.setHours(21, 0, 0, 0);
-                document.getElementById('timer-title').textContent = "До начала времени перепарковки (21:00) осталось:";
-                document.getElementById('timer-value').className = "text-2xl font-mono font-bold text-amber-400 drop-shadow-sm";
+                document.getElementById('timer-title').textContent = "До начала перепарковки (21:00) осталось:";
+                document.getElementById('timer-value').className = "text-3xl font-mono font-bold text-amber-400 drop-shadow-sm";
             }
 
             let diff = target - now;
@@ -271,30 +241,27 @@
                 `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
         }
 
-        // Инициализация при загрузке
-        function init() {
+        // Храним последнее состояние, чтобы не перезапускать анимацию каждую секунду
+        let lastMode = null;
+        let lastMidnightParkLeft = null;
+
+        function tick() {
             const logic = calculateLogic();
-            drawRoad(logic);
             updateTimerLive();
+            
+            // Перерисовываем дорогу ТОЛЬКО если изменились условия (например, пробило 21:00)
+            if (lastMode !== logic.mode || lastMidnightParkLeft !== logic.midnightParkLeft) {
+                drawRoad(logic);
+                lastMode = logic.mode;
+                lastMidnightParkLeft = logic.midnightParkLeft;
+            }
         }
 
-        init();
-        
-        // Обновление каждую секунду
-        setInterval(() => {
-            const logic = calculateLogic();
-            // Перерисовываем дорогу только если сменился режим (чтобы не сбрасывать анимацию каждую секунду)
-            // Но для простоты и надежности при переходе через 21:00 или 00:00:
-            const currentLeftContent = document.getElementById('left-road-content').innerHTML;
-            const expectedLogic = calculateLogic(); // вызываем еще раз для проверки
-            
-            // Простая проверка: если в HTML нет машинки, а должна быть, или наоборот - перерисовываем
-            // Или просто перерисовываем каждую минуту, а секунды тикают отдельно
-            drawRoad(logic); 
-            updateTimerLive();
-        }, 1000);
+        // Запуск
+        tick();
+        setInterval(tick, 1000);
 
-        // --- PWA Офлайн режим и Манифест (оставлен без изменений) ---
+        // PWA Манифест и Service Worker
         const manifestData = {
             "name": "Ассистент Парковки",
             "short_name": "Парковка",
@@ -302,12 +269,7 @@
             "display": "standalone",
             "background_color": "#0f172a",
             "theme_color": "#0f172a",
-            "icons": [{
-                "src": "logo-gradient.png",
-                "sizes": "192x192 512x512",
-                "type": "image/png",
-                "purpose": "any maskable"
-            }]
+            "icons": [{"src": "logo-gradient.png", "sizes": "192x192 512x512", "type": "image/png", "purpose": "any maskable"}]
         };
         const manifestBlob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
         const manifestLink = document.createElement('link');
@@ -316,29 +278,17 @@
         document.head.appendChild(manifestLink);
 
         const swCode = `
-            const CACHE_NAME = 'parking-v2';
+            const CACHE_NAME = 'parking-v3';
             self.addEventListener('install', e => { self.skipWaiting(); });
             self.addEventListener('activate', e => { self.clients.claim(); });
             self.addEventListener('fetch', e => {
-                e.respondWith(
-                    fetch(e.request).catch(() => new Response('Offline mode active.'))
-                );
+                e.respondWith(fetch(e.request).catch(() => new Response('Offline')));
             });
         `;
         const swBlob = new Blob([swCode], {type: 'application/javascript'});
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(err => console.log('SW setup failed', err));
+            navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(() => {});
         }
     </script>
 </body>
 </html>
-```
-
-### Ключевые улучшения:
-1. **Двойная анимация**: В дневное время (до 21:00) машинки выезжают с обеих сторон с небольшой задержкой (`animation-delay: 0.2s`), что создает приятный визуальный эффект и сразу привлекает внимание к схеме.
-2. **Цветовое кодирование**: 
-   - Зеленая подсветка и галочка = "Здесь можно остаться после полуночи".
-   - Желтая подсветка и часы = "Можно стоять сейчас, но убери до 21:00".
-   - Красный крест = "Строго запрещено" (после 21:00).
-3. **Адаптивность**: Схема дороги и тексты идеально масштабируются под экраны мобильных телефонов, не требуя прокрутки на стандартных устройствах.
-4. **Кнопка "Обновить"**: Перезагружает страницу, заново запуская все CSS-анимации выезда машинок, что полезно, если пользователь открыл приложение утром, а смотрит на него вечером.
