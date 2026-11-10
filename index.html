@@ -19,34 +19,38 @@
             -webkit-touch-callout: none;
             user-select: none;
         }
+        
+        /* Исправленная анимация выезда: меньше смещение, добавлен scale для плавности */
         @keyframes driveIn {
-            0% { transform: translateY(120px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
+            0% { transform: translateY(40px) scale(0.8); opacity: 0; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
         }
         .car-animate {
             animation: driveIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
+        
+        /* Анимация появления иконок с задержкой */
         @keyframes popIn {
             0% { transform: scale(0); opacity: 0; }
-            70% { transform: scale(1.2); opacity: 1; }
+            60% { transform: scale(1.2); opacity: 1; }
             100% { transform: scale(1); opacity: 1; }
         }
         .icon-pop {
-            animation: popIn 0.4s ease-out 0.5s forwards;
+            animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s forwards;
             opacity: 0;
         }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-200 h-screen w-full flex flex-col font-sans overflow-hidden relative">
 
-    <main class="flex-1 flex flex-col items-center pt-8 px-4 w-full max-w-md mx-auto relative z-10">
+    <main class="flex-1 flex flex-col items-center pt-6 px-4 w-full max-w-md mx-auto relative z-10 overflow-y-auto">
         
         <!-- Время -->
-        <div id="current-datetime" class="text-center text-slate-300 font-medium text-base mb-6 bg-slate-800/50 py-2 px-5 rounded-full border border-slate-700 shadow-md">
+        <div id="current-datetime" class="text-center text-slate-300 font-medium text-base mb-4 bg-slate-800/50 py-2 px-5 rounded-full border border-slate-700 shadow-md whitespace-nowrap">
             Загрузка...
         </div>
 
-        <h1 class="text-3xl font-extrabold text-white tracking-tight text-center mb-6 drop-shadow-md">
+        <h1 class="text-3xl font-extrabold text-white tracking-tight text-center mb-4 drop-shadow-md">
             Нагорное шоссе
         </h1>
 
@@ -61,18 +65,19 @@
             <div id="timer-value" class="text-3xl font-mono font-bold text-amber-400 drop-shadow-sm">--:--:--</div>
         </div>
 
-        <!-- Схема дороги -->
-        <div class="w-full h-72 bg-slate-600 rounded-3xl border-4 border-slate-500 flex relative overflow-hidden shadow-2xl mb-4">
-            <div class="absolute top-0 bottom-0 left-1/2 w-2 -ml-[4px] border-l-[8px] border-dashed border-slate-300 opacity-60 z-10"></div>
+        <!-- Схема дороги (увеличена высота до h-80 для предотвращения обрезки) -->
+        <div class="w-full h-80 bg-slate-600 rounded-3xl border-4 border-slate-500 flex relative shadow-2xl mb-4">
+            <!-- Разделительная полоса (с собственным overflow, чтобы не резать машинки) -->
+            <div class="absolute top-0 bottom-0 left-1/2 w-2 -ml-[4px] border-l-[8px] border-dashed border-slate-300 opacity-60 z-10 rounded-full"></div>
             
             <!-- Левая сторона -->
-            <div id="left-lane" class="flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-4 transition-all duration-500 border-t-4 border-transparent">
+            <div id="left-lane" class="flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-6 transition-all duration-500 border-t-4 border-transparent rounded-tl-2xl">
                 <div class="absolute top-3 text-slate-300 text-xs uppercase font-bold tracking-widest text-center z-20">Слева<br><span class="text-[10px] text-slate-400">(I)</span></div>
                 <div id="left-road-content" class="w-full h-full flex flex-col items-center justify-center relative"></div>
             </div>
 
             <!-- Правая сторона -->
-            <div id="right-lane" class="flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-4 transition-all duration-500 border-t-4 border-transparent">
+            <div id="right-lane" class="flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-6 transition-all duration-500 border-t-4 border-transparent rounded-tr-2xl">
                 <div class="absolute top-3 text-slate-300 text-xs uppercase font-bold tracking-widest text-center z-20">Справа<br><span class="text-[10px] text-slate-400">(II)</span></div>
                 <div id="right-road-content" class="w-full h-full flex flex-col items-center justify-center relative"></div>
             </div>
@@ -90,9 +95,9 @@
     </div>
 
     <script>
-        // SVG машинки (две версии: мгновенная и с задержкой для эффекта поочередного выезда)
+        // SVG машинки (чуть компактнее для идеального вписывания)
         const carSVG = `
-            <svg viewBox="0 0 100 200" class="w-12 h-24 car-animate drop-shadow-xl absolute bottom-2 z-10">
+            <svg viewBox="0 0 100 200" class="w-10 h-20 car-animate drop-shadow-xl absolute bottom-4 z-10">
                 <rect x="15" y="10" width="70" height="180" rx="25" fill="#f8fafc"/>
                 <rect x="20" y="40" width="60" height="35" fill="#0f172a" rx="5"/>
                 <rect x="20" y="130" width="60" height="40" fill="#0f172a" rx="5"/>
@@ -104,7 +109,7 @@
         `;
 
         const carSVGDelayed = `
-            <svg viewBox="0 0 100 200" class="w-12 h-24 car-animate drop-shadow-xl absolute bottom-2 z-10" style="animation-delay: 0.25s;">
+            <svg viewBox="0 0 100 200" class="w-10 h-20 car-animate drop-shadow-xl absolute bottom-4 z-10" style="animation-delay: 0.3s;">
                 <rect x="15" y="10" width="70" height="180" rx="25" fill="#f8fafc"/>
                 <rect x="20" y="40" width="60" height="35" fill="#0f172a" rx="5"/>
                 <rect x="20" y="130" width="60" height="40" fill="#0f172a" rx="5"/>
@@ -183,31 +188,31 @@
             
             leftContainer.innerHTML = '';
             rightContainer.innerHTML = '';
-            leftLane.className = "flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-4 transition-all duration-500 border-t-4 border-transparent";
-            rightLane.className = "flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-4 transition-all duration-500 border-t-4 border-transparent";
+            leftLane.className = "flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-6 transition-all duration-500 border-t-4 border-transparent rounded-tl-2xl";
+            rightLane.className = "flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-6 transition-all duration-500 border-t-4 border-transparent rounded-tr-2xl";
 
             if (mode === 'strict') {
                 if (midnightParkLeft) {
-                    leftContainer.innerHTML = carSVG + iconOk + `<span class="text-xs text-green-400 font-bold mt-2">Паркуйся здесь</span>`;
-                    rightContainer.innerHTML = iconCross + `<span class="text-xs text-red-400 font-bold mt-2">Не парковаться</span>`;
+                    leftContainer.innerHTML = carSVG + iconOk + `<span class="text-xs text-green-400 font-bold mt-1">Паркуйся здесь</span>`;
+                    rightContainer.innerHTML = iconCross + `<span class="text-xs text-red-400 font-bold mt-1">Не парковаться</span>`;
                     leftLane.classList.add('border-green-500/60', 'bg-slate-800');
                     rightLane.classList.add('opacity-50');
                 } else {
-                    leftContainer.innerHTML = iconCross + `<span class="text-xs text-red-400 font-bold mt-2">Не парковаться</span>`;
-                    rightContainer.innerHTML = carSVG + iconOk + `<span class="text-xs text-green-400 font-bold mt-2">Паркуйся здесь</span>`;
+                    leftContainer.innerHTML = iconCross + `<span class="text-xs text-red-400 font-bold mt-1">Не парковаться</span>`;
+                    rightContainer.innerHTML = carSVG + iconOk + `<span class="text-xs text-green-400 font-bold mt-1">Паркуйся здесь</span>`;
                     rightLane.classList.add('border-green-500/60', 'bg-slate-800');
                     leftLane.classList.add('opacity-50');
                 }
             } else {
                 // Мягкий режим: машинки выезжают с обеих сторон
                 if (midnightParkLeft) {
-                    leftContainer.innerHTML = carSVG + iconOk + `<span class="text-xs text-green-400 font-bold mt-2">Останется после 00:00</span>`;
-                    rightContainer.innerHTML = carSVGDelayed + iconWarning + `<span class="text-xs text-yellow-400 font-bold mt-2">Убрать до 21:00</span>`;
+                    leftContainer.innerHTML = carSVG + iconOk + `<span class="text-xs text-green-400 font-bold mt-1">Останется после 00:00</span>`;
+                    rightContainer.innerHTML = carSVGDelayed + iconWarning + `<span class="text-xs text-yellow-400 font-bold mt-1">Убрать до 21:00</span>`;
                     leftLane.classList.add('border-green-500/60');
                     rightLane.classList.add('border-yellow-500/40');
                 } else {
-                    leftContainer.innerHTML = carSVGDelayed + iconWarning + `<span class="text-xs text-yellow-400 font-bold mt-2">Убрать до 21:00</span>`;
-                    rightContainer.innerHTML = carSVG + iconOk + `<span class="text-xs text-green-400 font-bold mt-2">Останется после 00:00</span>`;
+                    leftContainer.innerHTML = carSVGDelayed + iconWarning + `<span class="text-xs text-yellow-400 font-bold mt-1">Убрать до 21:00</span>`;
+                    rightContainer.innerHTML = carSVG + iconOk + `<span class="text-xs text-green-400 font-bold mt-1">Останется после 00:00</span>`;
                     rightLane.classList.add('border-green-500/60');
                     leftLane.classList.add('border-yellow-500/40');
                 }
@@ -257,9 +262,11 @@
             }
         }
 
-        // Запуск
-        tick();
-        setInterval(tick, 1000);
+        // Запуск при загрузке страницы
+        window.addEventListener('DOMContentLoaded', () => {
+            tick(); // Первый запуск отрисовки и таймера
+            setInterval(tick, 1000); // Обновление каждую секунду
+        });
 
         // PWA Манифест и Service Worker
         const manifestData = {
@@ -278,7 +285,7 @@
         document.head.appendChild(manifestLink);
 
         const swCode = `
-            const CACHE_NAME = 'parking-v3';
+            const CACHE_NAME = 'parking-v4';
             self.addEventListener('install', e => { self.skipWaiting(); });
             self.addEventListener('activate', e => { self.clients.claim(); });
             self.addEventListener('fetch', e => {
