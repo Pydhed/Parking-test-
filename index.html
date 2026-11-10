@@ -20,74 +20,99 @@
             user-select: none;
         }
         
-        /* Исправленная анимация выезда: меньше смещение, добавлен scale для плавности */
-        @keyframes driveIn {
-            0% { transform: translateY(40px) scale(0.8); opacity: 0; }
-            100% { transform: translateY(0) scale(1); opacity: 1; }
+        /* Анимация выезда машинки целиком снизу */
+        @keyframes driveInFull {
+            0% { 
+                transform: translateY(250px); 
+                opacity: 0; 
+            }
+            30% {
+                opacity: 1;
+            }
+            100% { 
+                transform: translateY(0); 
+                opacity: 1; 
+            }
         }
         .car-animate {
-            animation: driveIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation: driveInFull 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
         
-        /* Анимация появления иконок с задержкой */
+        /* Анимация появления текста над машинкой */
+        @keyframes fadeInUp {
+            0% { 
+                transform: translateY(20px); 
+                opacity: 0; 
+            }
+            100% { 
+                transform: translateY(0); 
+                opacity: 1; 
+            }
+        }
+        .text-pop {
+            animation: fadeInUp 0.5s ease-out 0.8s forwards;
+            opacity: 0;
+        }
+        
+        /* Анимация появления иконок */
         @keyframes popIn {
             0% { transform: scale(0); opacity: 0; }
             60% { transform: scale(1.2); opacity: 1; }
             100% { transform: scale(1); opacity: 1; }
         }
         .icon-pop {
-            animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s forwards;
+            animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.6s forwards;
             opacity: 0;
         }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-200 h-screen w-full flex flex-col font-sans overflow-hidden relative">
 
-    <main class="flex-1 flex flex-col items-center pt-6 px-4 w-full max-w-md mx-auto relative z-10 overflow-y-auto">
+    <main class="flex-1 flex flex-col items-center pt-4 px-4 w-full max-w-md mx-auto relative z-10">
         
         <!-- Время -->
-        <div id="current-datetime" class="text-center text-slate-300 font-medium text-base mb-4 bg-slate-800/50 py-2 px-5 rounded-full border border-slate-700 shadow-md whitespace-nowrap">
+        <div id="current-datetime" class="text-center text-slate-300 font-medium text-sm mb-3 bg-slate-800/50 py-1.5 px-4 rounded-full border border-slate-700 shadow-md whitespace-nowrap">
             Загрузка...
         </div>
 
-        <h1 class="text-3xl font-extrabold text-white tracking-tight text-center mb-4 drop-shadow-md">
+        <h1 class="text-2xl font-extrabold text-white tracking-tight text-center mb-3 drop-shadow-md">
             Нагорное шоссе
         </h1>
 
-        <!-- Вердикт -->
-        <div class="w-full bg-slate-800/60 p-4 rounded-2xl border border-slate-700 mb-4 text-center shadow-lg">
-            <p id="verdict-text" class="text-lg text-white font-medium leading-relaxed"></p>
+        <!-- Краткий вердикт -->
+        <div class="w-full bg-slate-800/60 p-3 rounded-xl border border-slate-700 mb-3 text-center shadow-lg">
+            <p id="verdict-text" class="text-base text-white font-semibold leading-snug"></p>
         </div>
 
         <!-- Таймер -->
-        <div id="timer-container" class="w-full bg-slate-800/60 p-3 rounded-2xl border border-slate-700 mb-6 text-center">
-            <div id="timer-title" class="text-xs text-slate-400 uppercase tracking-widest font-bold mb-1">...</div>
-            <div id="timer-value" class="text-3xl font-mono font-bold text-amber-400 drop-shadow-sm">--:--:--</div>
+        <div id="timer-container" class="w-full bg-slate-800/60 p-2 rounded-xl border border-slate-700 mb-3 text-center">
+            <div id="timer-title" class="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-0.5">...</div>
+            <div id="timer-value" class="text-2xl font-mono font-bold text-amber-400 drop-shadow-sm">--:--:--</div>
         </div>
 
-        <!-- Схема дороги (увеличена высота до h-80 для предотвращения обрезки) -->
-        <div class="w-full h-80 bg-slate-600 rounded-3xl border-4 border-slate-500 flex relative shadow-2xl mb-4">
-            <!-- Разделительная полоса (с собственным overflow, чтобы не резать машинки) -->
+        <!-- Схема дороги (увеличена до h-96 для полной анимации) -->
+        <div class="w-full h-96 bg-slate-600 rounded-3xl border-4 border-slate-500 flex relative shadow-2xl mb-3 overflow-visible">
+            <!-- Разделительная полоса -->
             <div class="absolute top-0 bottom-0 left-1/2 w-2 -ml-[4px] border-l-[8px] border-dashed border-slate-300 opacity-60 z-10 rounded-full"></div>
             
             <!-- Левая сторона -->
-            <div id="left-lane" class="flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-6 transition-all duration-500 border-t-4 border-transparent rounded-tl-2xl">
-                <div class="absolute top-3 text-slate-300 text-xs uppercase font-bold tracking-widest text-center z-20">Слева<br><span class="text-[10px] text-slate-400">(I)</span></div>
-                <div id="left-road-content" class="w-full h-full flex flex-col items-center justify-center relative"></div>
+            <div id="left-lane" class="flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-4 transition-all duration-500 border-t-4 border-transparent rounded-tl-2xl overflow-hidden">
+                <div class="absolute top-2 text-slate-300 text-[10px] uppercase font-bold tracking-widest text-center z-20">Слева<br><span class="text-[9px] text-slate-400">(I)</span></div>
+                <div id="left-road-content" class="w-full h-full flex flex-col items-center justify-end relative pb-2"></div>
             </div>
 
             <!-- Правая сторона -->
-            <div id="right-lane" class="flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-6 transition-all duration-500 border-t-4 border-transparent rounded-tr-2xl">
-                <div class="absolute top-3 text-slate-300 text-xs uppercase font-bold tracking-widest text-center z-20">Справа<br><span class="text-[10px] text-slate-400">(II)</span></div>
-                <div id="right-road-content" class="w-full h-full flex flex-col items-center justify-center relative"></div>
+            <div id="right-lane" class="flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-4 transition-all duration-500 border-t-4 border-transparent rounded-tr-2xl overflow-hidden">
+                <div class="absolute top-2 text-slate-300 text-[10px] uppercase font-bold tracking-widest text-center z-20">Справа<br><span class="text-[9px] text-slate-400">(II)</span></div>
+                <div id="right-road-content" class="w-full h-full flex flex-col items-center justify-end relative pb-2"></div>
             </div>
         </div>
     </main>
 
     <!-- Кнопка Обновить -->
-    <div class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md pb-6 pt-3 px-4 border-t border-slate-800 z-20 flex justify-center">
-        <button onclick="window.location.reload()" class="w-full max-w-md bg-slate-700 hover:bg-slate-600 active:bg-slate-800 text-white text-xl font-bold py-4 rounded-2xl shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-3">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md pb-4 pt-2 px-4 border-t border-slate-800 z-20 flex justify-center">
+        <button onclick="window.location.reload()" class="w-full max-w-md bg-slate-700 hover:bg-slate-600 active:bg-slate-800 text-white text-lg font-bold py-3 rounded-xl shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
             </svg>
             Обновить
@@ -95,9 +120,9 @@
     </div>
 
     <script>
-        // SVG машинки (чуть компактнее для идеального вписывания)
+        // SVG машинки
         const carSVG = `
-            <svg viewBox="0 0 100 200" class="w-10 h-20 car-animate drop-shadow-xl absolute bottom-4 z-10">
+            <svg viewBox="0 0 100 200" class="w-12 h-24 car-animate drop-shadow-xl absolute bottom-2 z-10">
                 <rect x="15" y="10" width="70" height="180" rx="25" fill="#f8fafc"/>
                 <rect x="20" y="40" width="60" height="35" fill="#0f172a" rx="5"/>
                 <rect x="20" y="130" width="60" height="40" fill="#0f172a" rx="5"/>
@@ -109,7 +134,7 @@
         `;
 
         const carSVGDelayed = `
-            <svg viewBox="0 0 100 200" class="w-10 h-20 car-animate drop-shadow-xl absolute bottom-4 z-10" style="animation-delay: 0.3s;">
+            <svg viewBox="0 0 100 200" class="w-12 h-24 car-animate drop-shadow-xl absolute bottom-2 z-10" style="animation-delay: 0.3s;">
                 <rect x="15" y="10" width="70" height="180" rx="25" fill="#f8fafc"/>
                 <rect x="20" y="40" width="60" height="35" fill="#0f172a" rx="5"/>
                 <rect x="20" y="130" width="60" height="40" fill="#0f172a" rx="5"/>
@@ -121,24 +146,24 @@
         `;
 
         const iconOk = `
-            <div class="bg-green-500/90 p-2 rounded-full shadow-[0_0_15px_rgba(34,197,94,0.8)] z-20 icon-pop mb-2">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="bg-green-500/90 p-1.5 rounded-full shadow-[0_0_15px_rgba(34,197,94,0.8)] z-20 icon-pop mb-1">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7"></path>
                 </svg>
             </div>
         `;
 
         const iconCross = `
-            <div class="bg-red-500/90 p-2 rounded-full shadow-[0_0_15px_rgba(239,68,68,0.8)] z-20 icon-pop mb-2">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="bg-red-500/90 p-1.5 rounded-full shadow-[0_0_15px_rgba(239,68,68,0.8)] z-20 icon-pop mb-1">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </div>
         `;
 
         const iconWarning = `
-            <div class="bg-yellow-500/90 p-2 rounded-full shadow-[0_0_15px_rgba(234,179,8,0.8)] z-20 icon-pop mb-2">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="bg-yellow-500/90 p-1.5 rounded-full shadow-[0_0_15px_rgba(234,179,8,0.8)] z-20 icon-pop mb-1">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
             </div>
@@ -146,9 +171,9 @@
 
         function calculateLogic() {
             const now = new Date();
-            const dateStr = now.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+            const dateStr = now.toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric', month: 'short' });
             const timeStr = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-            document.getElementById('current-datetime').textContent = `${dateStr.charAt(0).toUpperCase() + dateStr.slice(1)} • ${timeStr}`;
+            document.getElementById('current-datetime').textContent = `${dateStr} • ${timeStr}`;
 
             const hours = now.getHours();
             const isChangeover = (hours >= 21); 
@@ -157,23 +182,14 @@
             tomorrow.setDate(tomorrow.getDate() + 1);
             let tomorrowOdd = (tomorrow.getDate() % 2 !== 0);
             
-            // Если завтра четное, паркуемся слева (true). Если нечетное, то справа (false).
             const midnightParkLeft = !tomorrowOdd;
             const mode = isChangeover ? 'strict' : 'relaxed';
 
             let verdict = "";
             if (mode === 'strict') {
-                if (midnightParkLeft) {
-                    verdict = 'Завтра четное число. Паркуемся только <span class="text-green-400 font-bold">слева</span>. Переставьте авто до 00:00!';
-                } else {
-                    verdict = 'Завтра нечетное число. Паркуемся только <span class="text-green-400 font-bold">справа</span>. Переставьте авто до 00:00!';
-                }
+                verdict = midnightParkLeft ? 'Четное число → <span class="text-green-400">слева</span>' : 'Нечетное число → <span class="text-green-400">справа</span>';
             } else {
-                if (midnightParkLeft) {
-                    verdict = 'До 21:00 можно стоять с обеих сторон.<br>Но после полуночи парковка будет разрешена только <span class="text-green-400 font-bold">слева</span> (завтра четное).';
-                } else {
-                    verdict = 'До 21:00 можно стоять с обеих сторон.<br>Но после полуночи парковка будет разрешена только <span class="text-green-400 font-bold">справа</span> (завтра нечетное).';
-                }
+                verdict = 'До 21:00 — <span class="text-yellow-400">с обеих сторон</span>';
             }
 
             document.getElementById('verdict-text').innerHTML = verdict;
@@ -188,31 +204,77 @@
             
             leftContainer.innerHTML = '';
             rightContainer.innerHTML = '';
-            leftLane.className = "flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-6 transition-all duration-500 border-t-4 border-transparent rounded-tl-2xl";
-            rightLane.className = "flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-6 transition-all duration-500 border-t-4 border-transparent rounded-tr-2xl";
+            leftLane.className = "flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-4 transition-all duration-500 border-t-4 border-transparent rounded-tl-2xl overflow-hidden";
+            rightLane.className = "flex-1 flex flex-col items-center justify-end relative bg-slate-800/80 pb-4 transition-all duration-500 border-t-4 border-transparent rounded-tr-2xl overflow-hidden";
 
             if (mode === 'strict') {
                 if (midnightParkLeft) {
-                    leftContainer.innerHTML = carSVG + iconOk + `<span class="text-xs text-green-400 font-bold mt-1">Паркуйся здесь</span>`;
-                    rightContainer.innerHTML = iconCross + `<span class="text-xs text-red-400 font-bold mt-1">Не парковаться</span>`;
+                    leftContainer.innerHTML = `
+                        <div class="text-pop text-xs text-green-400 font-bold text-center mb-1 absolute top-8 z-30 bg-slate-900/80 px-2 py-1 rounded">
+                            Можно до 00:00
+                        </div>
+                        ${carSVG}
+                        ${iconOk}
+                    `;
+                    rightContainer.innerHTML = `
+                        <div class="text-pop text-xs text-red-400 font-bold text-center mb-1 absolute top-8 z-30 bg-slate-900/80 px-2 py-1 rounded">
+                            Нельзя
+                        </div>
+                        ${iconCross}
+                    `;
                     leftLane.classList.add('border-green-500/60', 'bg-slate-800');
                     rightLane.classList.add('opacity-50');
                 } else {
-                    leftContainer.innerHTML = iconCross + `<span class="text-xs text-red-400 font-bold mt-1">Не парковаться</span>`;
-                    rightContainer.innerHTML = carSVG + iconOk + `<span class="text-xs text-green-400 font-bold mt-1">Паркуйся здесь</span>`;
+                    leftContainer.innerHTML = `
+                        <div class="text-pop text-xs text-red-400 font-bold text-center mb-1 absolute top-8 z-30 bg-slate-900/80 px-2 py-1 rounded">
+                            Нельзя
+                        </div>
+                        ${iconCross}
+                    `;
+                    rightContainer.innerHTML = `
+                        <div class="text-pop text-xs text-green-400 font-bold text-center mb-1 absolute top-8 z-30 bg-slate-900/80 px-2 py-1 rounded">
+                            Можно до 00:00
+                        </div>
+                        ${carSVG}
+                        ${iconOk}
+                    `;
                     rightLane.classList.add('border-green-500/60', 'bg-slate-800');
                     leftLane.classList.add('opacity-50');
                 }
             } else {
                 // Мягкий режим: машинки выезжают с обеих сторон
                 if (midnightParkLeft) {
-                    leftContainer.innerHTML = carSVG + iconOk + `<span class="text-xs text-green-400 font-bold mt-1">Останется после 00:00</span>`;
-                    rightContainer.innerHTML = carSVGDelayed + iconWarning + `<span class="text-xs text-yellow-400 font-bold mt-1">Убрать до 21:00</span>`;
+                    leftContainer.innerHTML = `
+                        <div class="text-pop text-xs text-green-400 font-bold text-center mb-1 absolute top-8 z-30 bg-slate-900/80 px-2 py-1 rounded">
+                            Останется после 00:00
+                        </div>
+                        ${carSVG}
+                        ${iconOk}
+                    `;
+                    rightContainer.innerHTML = `
+                        <div class="text-pop text-xs text-yellow-400 font-bold text-center mb-1 absolute top-8 z-30 bg-slate-900/80 px-2 py-1 rounded">
+                            Убрать до 21:00
+                        </div>
+                        ${carSVGDelayed}
+                        ${iconWarning}
+                    `;
                     leftLane.classList.add('border-green-500/60');
                     rightLane.classList.add('border-yellow-500/40');
                 } else {
-                    leftContainer.innerHTML = carSVGDelayed + iconWarning + `<span class="text-xs text-yellow-400 font-bold mt-1">Убрать до 21:00</span>`;
-                    rightContainer.innerHTML = carSVG + iconOk + `<span class="text-xs text-green-400 font-bold mt-1">Останется после 00:00</span>`;
+                    leftContainer.innerHTML = `
+                        <div class="text-pop text-xs text-yellow-400 font-bold text-center mb-1 absolute top-8 z-30 bg-slate-900/80 px-2 py-1 rounded">
+                            Убрать до 21:00
+                        </div>
+                        ${carSVGDelayed}
+                        ${iconWarning}
+                    `;
+                    rightContainer.innerHTML = `
+                        <div class="text-pop text-xs text-green-400 font-bold text-center mb-1 absolute top-8 z-30 bg-slate-900/80 px-2 py-1 rounded">
+                            Останется после 00:00
+                        </div>
+                        ${carSVG}
+                        ${iconOk}
+                    `;
                     rightLane.classList.add('border-green-500/60');
                     leftLane.classList.add('border-yellow-500/40');
                 }
@@ -227,12 +289,12 @@
             if (isChangeover) {
                 target.setDate(target.getDate() + 1);
                 target.setHours(0, 0, 0, 0);
-                document.getElementById('timer-title').textContent = "До смены правил (00:00) осталось:";
-                document.getElementById('timer-value').className = "text-3xl font-mono font-bold text-red-400 drop-shadow-sm";
+                document.getElementById('timer-title').textContent = "До 00:00:";
+                document.getElementById('timer-value').className = "text-2xl font-mono font-bold text-red-400 drop-shadow-sm";
             } else {
                 target.setHours(21, 0, 0, 0);
-                document.getElementById('timer-title').textContent = "До начала перепарковки (21:00) осталось:";
-                document.getElementById('timer-value').className = "text-3xl font-mono font-bold text-amber-400 drop-shadow-sm";
+                document.getElementById('timer-title').textContent = "До 21:00:";
+                document.getElementById('timer-value').className = "text-2xl font-mono font-bold text-amber-400 drop-shadow-sm";
             }
 
             let diff = target - now;
@@ -246,7 +308,6 @@
                 `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
         }
 
-        // Храним последнее состояние, чтобы не перезапускать анимацию каждую секунду
         let lastMode = null;
         let lastMidnightParkLeft = null;
 
@@ -254,7 +315,6 @@
             const logic = calculateLogic();
             updateTimerLive();
             
-            // Перерисовываем дорогу ТОЛЬКО если изменились условия (например, пробило 21:00)
             if (lastMode !== logic.mode || lastMidnightParkLeft !== logic.midnightParkLeft) {
                 drawRoad(logic);
                 lastMode = logic.mode;
@@ -262,13 +322,12 @@
             }
         }
 
-        // Запуск при загрузке страницы
         window.addEventListener('DOMContentLoaded', () => {
-            tick(); // Первый запуск отрисовки и таймера
-            setInterval(tick, 1000); // Обновление каждую секунду
+            tick();
+            setInterval(tick, 1000);
         });
 
-        // PWA Манифест и Service Worker
+        // PWA
         const manifestData = {
             "name": "Ассистент Парковки",
             "short_name": "Парковка",
@@ -285,7 +344,7 @@
         document.head.appendChild(manifestLink);
 
         const swCode = `
-            const CACHE_NAME = 'parking-v4';
+            const CACHE_NAME = 'parking-v5';
             self.addEventListener('install', e => { self.skipWaiting(); });
             self.addEventListener('activate', e => { self.clients.claim(); });
             self.addEventListener('fetch', e => {
