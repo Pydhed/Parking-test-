@@ -430,11 +430,11 @@
             } else {
                 if (midnightParkLeft) {
                     leftC.innerHTML = badge('Останется после 00:00','green') + createCar(1,0) + icons.ok;
-                    rightC.innerHTML = badge('Убрать до 21:00','yellow') + createCar(2,0.3) + icons.warn;
+                    rightC.innerHTML = badge('Убрать с 21:00 до 00:00','yellow') + createCar(2,0.3) + icons.warn;
                     leftL.classList.add('ok');
                     rightL.classList.add('warn');
                 } else {
-                    leftC.innerHTML = badge('Убрать до 21:00','yellow') + createCar(2,0.3) + icons.warn;
+                    leftC.innerHTML = badge('Убрать с 21:00 до 00:00','yellow') + createCar(2,0.3) + icons.warn;
                     rightC.innerHTML = badge('Останется после 00:00','green') + createCar(1,0) + icons.ok;
                     rightL.classList.add('ok');
                     leftL.classList.add('warn');
