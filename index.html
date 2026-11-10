@@ -5,10 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ассистент Парковки</title>
     <meta name="theme-color" content="#0f172a">
+    
+    <!-- iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="icon" type="image/png" href="logo-gradient.png">
+    <meta name="apple-mobile-web-app-title" content="Парковка">
+    
+    <!-- Иконки для всех платформ -->
+    <link rel="icon" type="image/png" sizes="192x192" href="logo-gradient.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="logo-gradient.png">
     <link rel="apple-touch-icon" href="logo-gradient.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="logo-gradient.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="logo-gradient.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="logo-gradient.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="logo-gradient.png">
+    
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -92,7 +103,7 @@
             display: flex;
             position: relative;
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-            overflow: visible;
+            overflow: hidden;
         }
         .divider {
             position: absolute;
@@ -113,15 +124,11 @@
             justify-content: flex-start;
             position: relative;
             background: rgba(30,41,59,0.8);
-            padding-top: 32px;
             transition: all 0.5s;
-            border-top: 4px solid transparent;
-            overflow: visible;
+            overflow: hidden;
         }
-        .lane:first-child { border-top-left-radius: 16px; }
-        .lane:last-child { border-top-right-radius: 16px; }
-        .lane.ok { border-top-color: rgba(34,197,94,0.6); background: rgba(30,41,59,1); }
-        .lane.warn { border-top-color: rgba(234,179,8,0.4); }
+        .lane.ok { background: rgba(30,41,59,1); box-shadow: inset 0 4px 0 rgba(34,197,94,0.6); }
+        .lane.warn { box-shadow: inset 0 4px 0 rgba(234,179,8,0.4); }
         .lane.disabled { opacity: 0.5; }
         .lane-label {
             position: absolute;
@@ -141,6 +148,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+            padding-top: 24px;
         }
         .badge {
             font-size: 12px;
@@ -203,7 +212,6 @@
         .green { color: #4ade80; }
         .yellow { color: #facc15; }
 
-        /* Анимации */
         @keyframes driveIn {
             0% { transform: translateY(200px); opacity: 0; }
             15% { opacity: 1; }
@@ -284,14 +292,49 @@
     </div>
 
     <script>
-        // Генератор SVG машины (одна функция для обеих машинок)
+        // PWA Манифест для установки на рабочий стол
+        const manifestData = {
+            "name": "Ассистент Парковки",
+            "short_name": "Парковка",
+            "description": "Помощник парковки на Нагорном шоссе",
+            "start_url": ".",
+            "display": "standalone",
+            "orientation": "portrait",
+            "background_color": "#0f172a",
+            "theme_color": "#0f172a",
+            "icons": [
+                {
+                    "src": "logo-gradient.png",
+                    "sizes": "192x192",
+                    "type": "image/png",
+                    "purpose": "any"
+                },
+                {
+                    "src": "logo-gradient.png",
+                    "sizes": "512x512",
+                    "type": "image/png",
+                    "purpose": "any"
+                },
+                {
+                    "src": "logo-gradient.png",
+                    "sizes": "512x512",
+                    "type": "image/png",
+                    "purpose": "maskable"
+                }
+            ]
+        };
+        const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
+        const manifestLink = document.createElement('link');
+        manifestLink.rel = 'manifest';
+        manifestLink.href = URL.createObjectURL(manifestBlob);
+        document.head.appendChild(manifestLink);
+
         function createCar(num, delay) {
             const d = delay ? `style="animation-delay:${delay}s"` : '';
-            const dBeam = delay ? `style="animation-delay:${delay}s"` : '';
             return `
                 <div class="car-wrap" ${d}>
-                    <div class="beam left" ${dBeam}></div>
-                    <div class="beam right" ${dBeam}></div>
+                    <div class="beam left" ${d}></div>
+                    <div class="beam right" ${d}></div>
                     <svg viewBox="0 0 100 200" width="80" height="160" style="display:block;filter:drop-shadow(0 10px 15px rgba(0,0,0,0.5))">
                         <defs>
                             <linearGradient id="bg${num}" x1="0" y1="0" x2="1" y2="1">
